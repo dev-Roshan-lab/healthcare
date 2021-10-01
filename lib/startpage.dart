@@ -56,7 +56,6 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   Future<void> _authenticateMe() async {
-    print('-----------------imma trying');
     // 8. this method opens a dialog for fingerprint authentication.
     //    we do not need to create a dialog nut it popsup from device natively.
     bool authenticated = false;

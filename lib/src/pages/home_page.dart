@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -9,13 +9,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:health/authentication/createAcc.dart';
 import 'package:health/pages/profile.dart';
 import 'package:health/src/model/dactor_model.dart';
-import 'package:health/src/model/data.dart';
 import 'package:health/src/theme/extention.dart';
 import 'package:health/src/theme/light_color.dart';
 import 'package:health/src/theme/text_styles.dart';
 import 'package:health/src/theme/theme.dart';
 import 'package:health/widgets/UserInfo.dart';
 import 'package:health/widgets/utils.dart';
+import 'package:http/http.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,17 +30,27 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String username;
   String imgUrl;
+  List doctorMapList;
   String customBio = "Staying healthy!";
   final fieldText = TextEditingController();
   List<DoctorModel> doctorDataList;
+  final searchControl = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     getUserInfo();
-    doctorDataList = doctorMapList.map((x) => DoctorModel.fromJson(x)).toList();
-
     super.initState();
+    sendRequest();
+  }
+
+  sendRequest() async {
+    Response response = await get('https://csv2api.herokuapp.com/api/v1?url=https://raw.githubusercontent.com/dev-Roshan-lab/healthcare/main/data.csv');
+    setState(() {
+      doctorMapList = jsonDecode(response.body);
+      doctorDataList = doctorMapList.map((x) => DoctorModel.fromJson(x)).toList();
+    });
+    print(doctorMapList);
   }
 
   getUserInfo() async {
@@ -122,6 +132,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       child: TextField(
+        controller: searchControl,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: InputBorder.none,
@@ -129,10 +140,23 @@ class _HomePageState extends State<HomePage> {
           hintStyle: TextStyles.body.subTitleColor,
           suffixIcon: SizedBox(
               width: 50,
-              child: Icon(Icons.search, color: LightColor.purple)
-                  .alignCenter
-                  .ripple(() {}, borderRadius: BorderRadius.circular(13))),
+              child: IconButton(icon: Icon(Icons.cancel), onPressed: () {
+                searchControl.clear();
+                doctorDataList = doctorMapList.map((x) => DoctorModel.fromJson(x)).toList();
+              },)),
         ),
+        onChanged: (v) {
+          //added search
+          if (v == null || v == '') {
+            doctorDataList = doctorMapList.map((x) => DoctorModel.fromJson(x)).toList();
+          } else {
+            for (int i = 0; i< doctorDataList.length; i++) {
+              if (!doctorDataList[i].type.toLowerCase().contains(v.toLowerCase())) {
+                doctorDataList.removeAt(i);
+              }
+            }
+          }
+        },
       ),
     );
   }
@@ -272,14 +296,16 @@ class _HomePageState extends State<HomePage> {
                   style: GoogleFonts.merriweather(fontSize: 20)),
               IconButton(
                   icon: Icon(
-                    Icons.sort,
+                    Icons.rotate_right_outlined,
                     color: Theme.of(context).primaryColor,
                   ),
-                  onPressed: () {})
+                  onPressed: () {
+
+                  })
               // .p(12).ripple(() {}, borderRadius: BorderRadius.all(Radius.circular(20))),
             ],
           ).hP16,
-          getdoctorWidgetList()
+          doctorDataList == null ? SizedBox(width: 50, height: 50, child: CircularProgressIndicator()) : getdoctorWidgetList()
         ],
       ),
     );
@@ -346,6 +372,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ).ripple(() {
+        print(model.tags);
         Navigator.pushNamed(context, "/DetailPage", arguments: model);
       }, borderRadius: BorderRadius.all(Radius.circular(20))),
     );

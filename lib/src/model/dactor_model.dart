@@ -10,6 +10,7 @@ class DoctorModel {
     double satisfaction;
     bool isfavourite;
     String image;
+    String tags;
 
     DoctorModel({
         this.name,
@@ -21,6 +22,7 @@ class DoctorModel {
         this.satisfaction,
         this.isfavourite,
         this.image,
+        this.tags
     });
 
     DoctorModel copyWith({
@@ -33,6 +35,7 @@ class DoctorModel {
         double satisfaction,
         bool isfavourite,
         String image,
+        String tags
     }) => 
         DoctorModel(
             name: name ?? this.name,
@@ -44,6 +47,7 @@ class DoctorModel {
             satisfaction: satisfaction ?? this.satisfaction,
             isfavourite: isfavourite ?? this.isfavourite,
             image: image ?? this.image,
+            tags: tags ?? this.tags
         );
 
     factory DoctorModel.fromRawJson(String str) => DoctorModel.fromJson(json.decode(str));
@@ -60,6 +64,7 @@ class DoctorModel {
         satisfaction: json["satisfaction"] == null ? null : json["satisfaction"].toDouble(),
         isfavourite: json["isfavourite"] == null ? null : json["isfavourite"],
         image: json["image"] == null ? null : json["image"],
+        tags: json[" tags"] == null ? null : json[" tags"],
     );
 
     Map<String, dynamic> toJson() => {
@@ -72,5 +77,6 @@ class DoctorModel {
         "satisfaction": satisfaction == null ? null : satisfaction,
         "isfavourite": isfavourite == null ? null : isfavourite,
         "image": image == null ? null : image,
+        "tags": tags == null ? null : tags
     };
 }

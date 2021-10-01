@@ -36,6 +36,7 @@ class _DetailPageState extends State<DetailPage> {
   Razorpay _razorpay;
   bool success = false;
   DateTime date;
+  List tags = [];
 
   @override
   void initState() {
@@ -59,6 +60,9 @@ class _DetailPageState extends State<DetailPage> {
         times = '0';
       });
     }
+    setState(() {
+      tags = model.tags.split("*");
+    });
   }
 
   getCloudData() async {
@@ -82,7 +86,7 @@ class _DetailPageState extends State<DetailPage> {
 
   void openCheckout(int cost, String name) async {
     var options = {
-      'key': '{RAZORPAY_API_KEY}}',
+      'key': 'rzp_test_421aJpA2JEmGGf',
       'amount': cost,
       'name': name,
       'description': 'Doctor Fees',
@@ -174,7 +178,7 @@ class _DetailPageState extends State<DetailPage> {
               minChildSize: .6,
               builder: (context, scrollController) {
                 return Container(
-                  height: AppTheme.fullHeight(context) * .5,
+                  height: AppTheme.fullHeight(context) * .6,
                   padding: EdgeInsets.only(
                       left: 19,
                       right: 19,
@@ -233,9 +237,41 @@ class _DetailPageState extends State<DetailPage> {
                         Text("About", style: titleStyle).vP16,
                         Text(
                           model.description,
-                          style: TextStyles.body.subTitleColor,
+                          style: TextStyle(
+                            color: Colors.black
+                          ),
                         ),
-                        SizedBox(height: 40,),
+                        SizedBox(height: 10,),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: SizedBox(
+                            height: 50,
+                            width: AppTheme.fullWidth(context) - 20,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: tags.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Card(
+                                  color: Colors.blue,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Center(
+                                      child: Text(
+                                        tags[index],
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10,),
                         TextField(
                           controller: authctrl,
                           decoration: InputDecoration(
@@ -276,66 +312,71 @@ class _DetailPageState extends State<DetailPage> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              FloatingActionButton(
-                                heroTag: "lol",
-                                child: Icon(Icons.call),
-                                onPressed: () async {
-                                  const url = 'tel:9444160512';
-                                  if (await canLaunch(url)) {
-                                    launch(url);
-                                  }
-                                },
-                                backgroundColor: Colors.blueGrey,
-                              ),
-                              SizedBox(width: 10,),
-                              FloatingActionButton(
-                                heroTag: "ogg",
-                                child: Icon(Icons.message),
-                                onPressed: () async {
-                                  print('lol');
-                                  const url = 'sms:+919444160512?body=Hello%20Doctor';
-                                  if (await canLaunch(url)) {
-                                    launch(url);
-                                  }
-                                },
-                                backgroundColor: Colors.blueGrey,
-                                focusColor: Colors.blueGrey,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              FlatButton(
-                                color: Theme.of(context).primaryColor,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
-                                onPressed: () async {
-                                  await DatePicker.showDateTimePicker(context,
-                                      showTitleActions: true,
-                                      minTime: DateTime(2020, 5, 5, 20, 50),
-                                      maxTime: DateTime(2021, 6, 30, 05, 09),
-                                      onConfirm: (time) async {
-                                        print('confirm $time');
-                                        setState(() {
-                                          date = time;
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                FloatingActionButton(
+                                  heroTag: "lol",
+                                  child: Icon(Icons.call),
+                                  onPressed: () async {
+                                    const url = 'tel:9444160512';
+                                    if (await canLaunch(url)) {
+                                      launch(url);
+                                    }
+                                  },
+                                  backgroundColor: Colors.blueGrey,
+                                ),
+                                SizedBox(width: 10,),
+                                FloatingActionButton(
+                                  heroTag: "ogg",
+                                  child: Icon(Icons.message),
+                                  onPressed: () async {
+                                    print('lol');
+                                    const url = 'sms:+919444160512?body=Hello%20Doctor';
+                                    if (await canLaunch(url)) {
+                                      launch(url);
+                                    }
+                                  },
+                                  backgroundColor: Colors.blueGrey,
+                                  focusColor: Colors.blueGrey,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                FlatButton(
+                                  color: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  onPressed: () async {
+                                    await DatePicker.showDateTimePicker(
+                                        context,
+                                        showTitleActions: true,
+                                        minTime: DateTime(2020, 5, 5, 20, 50),
+                                        maxTime: DateTime(2021, 10, 30, 05, 09),
+                                        onConfirm: (time) async {
+                                          print('confirm $time');
+                                          setState(() {
+                                            date = time;
+                                          });
+                                          await scheduleAlarm(date, 'Medical checkup on ${date.toString()} with ${model.name}');
+                                          //fixed opening of checkout even on clicking cancel
+                                          await openCheckout(5000, model.name);
                                         });
-                                        await scheduleAlarm(date, 'Medical checkup on ${date.toString()} with ${model.name}');
-                                      });
-                                  await openCheckout(5000, model.name);
-                                  if (msg == '' || success == false) {
-                                  } else {
-                                    await getName();
-                                  }
-                                },
-                                child: Text(
-                                  "Make an appointment",
-                                  style: TextStyles.titleNormal.white,
-                                ).p(10),
-                              ),
-                            ],
-                          ).vP16,
+                                    if (msg == '' || success == false) {
+                                    } else {
+                                      await getName();
+                                    }
+                                  },
+                                  child: Text(
+                                    "Make an appointment",
+                                    style: TextStyles.titleNormal.white,
+                                  ).p(10),
+                                ),
+                              ],
+                            ).vP16,
+                          ),
                         ),
                         Padding(
                           padding: EdgeInsets.all(2),
@@ -374,7 +415,7 @@ class _DetailPageState extends State<DetailPage> {
                                         SingleChildScrollView(
                                           scrollDirection: Axis.vertical,
                                           child: SizedBox(
-                                            width: 100,
+                                            width: 50,
                                             child: Text(
                                               appnts[int]["msg"],
                                               softWrap: true,

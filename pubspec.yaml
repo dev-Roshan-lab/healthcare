@@ -55,6 +55,8 @@ dependencies:
   local_auth:
   maps_launcher:
   flutter_local_notifications: ^1.4.4+2
+  ffi:
+  http:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons:
@@ -62,7 +64,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -81,9 +82,15 @@ flutter:
     - assets/img/splash.svg
     - assets/img/TB.svg
     - assets/doctor.png
-    - assets/doctor_1.png
-    - assets/doctor_3.png
-    - assets/doctor_4.png
+    - assets/doctor1.png
+    - assets/doctor2.png
+    - assets/doctor5.png
+    - assets/doctor6.png
+    - assets/doctor7.png
+    - assets/doctor8.png
+    - assets/doctor9.png
+    - assets/doctor3.png
+    - assets/doctor4.png
     - assets/img/covid.svg
     - assets/models/tb_labels.txt
     - assets/models/tb_model.tflite
