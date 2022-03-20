@@ -20,6 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
+import 'package:flutter/scheduler.dart';
 
 class DetailPage extends StatefulWidget {
   DetailPage({Key? key, this.model}) : super(key: key);
@@ -30,8 +31,6 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  final _channelController = TextEditingController();
-  bool _validateError = false;
   ClientRole _role = ClientRole.Broadcaster;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   DoctorModel? model;
@@ -91,22 +90,13 @@ class _DetailPageState extends State<DetailPage> {
   void dispose() {
     super.dispose();
     _razorpay.clear();
-    _channelController.dispose();
 
   }
   Future<void> onJoin(String id,BuildContext context) async {
-    // update input validation
-    print('cleic');
-    setState(() {
-      _channelController.text.isEmpty
-          ? _validateError = true
-          : _validateError = false;
-    });
-    if (id != null) {
-      await _handleCameraAndMic(Permission.camera);
-      await _handleCameraAndMic(Permission.microphone);
-      await Navigator.push(
-        context,
+    await _handleCameraAndMic(Permission.camera);
+    await _handleCameraAndMic(Permission.microphone);
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => VideoCall(
             channelName: id,
@@ -114,7 +104,7 @@ class _DetailPageState extends State<DetailPage> {
           ),
         ),
       );
-    }
+    });
   }
 
   Future<void> _handleCameraAndMic(Permission permission) async {
