@@ -14,15 +14,15 @@ class SkinPage extends StatefulWidget {
 
 class _SkinPageState extends State<SkinPage> {
 
-  File _image;
-  List _recognitions = [];
-  bool _busy;
+  late File _image;
+  List? _recognitions = [];
+  bool? _busy;
   bool loaded = false;
   final picker = ImagePicker();
 
   loadTfModel() async {
     Tflite.close();
-    String res = await Tflite.loadModel(
+    String? res = await Tflite.loadModel(
         model: "assets/models/sc_model.tflite",
         labels: "assets/models/sc_labels.txt",
         numThreads: 1
@@ -83,13 +83,14 @@ class _SkinPageState extends State<SkinPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            color: Theme.of(context).secondaryHeaderColor,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -98,7 +99,7 @@ class _SkinPageState extends State<SkinPage> {
         title: Text(
           "Skin cancer Prediction",
           style: GoogleFonts.merriweather(
-            color: Colors.black,
+            color: Theme.of(context).secondaryHeaderColor,
           ),
         ),
       ),
@@ -116,49 +117,38 @@ class _SkinPageState extends State<SkinPage> {
                   child: SizedBox(
                     height: 300,
                     width: 300,
-                    child: loaded ? Image.file(_image) : Card(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 30,),
-                            SizedBox(height: 20,),
-                            Text('Upload Image')
-                          ],
-                        ),
-                      elevation: 20,
-                    ),
+                    child: loaded ? Image.file(_image) : SvgPicture.asset('assets/img/Skin.svg')
                   ),
                 )
             ),
             Padding(
               padding: const EdgeInsets.only(top: 50.0),
-              child: Container(
-                height: 50.0,
-                width: 220.0,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(0.0, 20.0),
-                      blurRadius: 30.0,
-                      color: Colors.black12,
+              child: GestureDetector(
+                onTap: () {
+                  print('lol');
+                  getImageFromGallery();
+                },
+                child: Container(
+                  height: 50.0,
+                  width: 220.0,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        offset: Offset(0.0, 20.0),
+                        blurRadius: 30.0,
+                        color: Colors.black12,
+                      ),
+                    ],
+                    color: Theme.of(context).secondaryHeaderColor == Colors.black ? Colors.white : Theme.of(context).secondaryHeaderColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(25.0),
+                      topLeft: Radius.circular(25.0),
+                      bottomRight: Radius.circular(15.0),
+                      topRight: Radius.circular(15.0),
                     ),
-                  ],
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(25.0),
-                    topLeft: Radius.circular(25.0),
-                    bottomRight: Radius.circular(15.0),
-                    topRight: Radius.circular(15.0),
+                    //   borderRadius:
+                    //       BorderRadius.circular(25.0),
                   ),
-                  //   borderRadius:
-                  //       BorderRadius.circular(25.0),
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    print('lol');
-                    getImageFromGallery();
-                  },
                   child: Row(
                     children: <Widget>[
                       Container(
@@ -169,8 +159,9 @@ class _SkinPageState extends State<SkinPage> {
                           padding:
                           EdgeInsets.symmetric(vertical: 15, horizontal: 10.0),
                           child: Text(
-                            'Predict',
-                            style: GoogleFonts.nunito(
+                            'Choose an image'
+                            ,
+                            style: GoogleFonts.nunito( color:Theme.of(context).primaryColor,
                               fontSize: 15,
                             ),
                           ),
@@ -186,7 +177,7 @@ class _SkinPageState extends State<SkinPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),
-                        child: Icon(FontAwesome.picture_o),
+                        child: Icon(FontAwesome.picture_o,color:Theme.of(context).primaryColor == Colors.white ? Colors.black:Theme.of(context).primaryColor ),
                       )
                     ],
                   ),
@@ -194,22 +185,35 @@ class _SkinPageState extends State<SkinPage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(5),
-              child: Card(
-                elevation: 10,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.only(left:8.0,top:15,bottom:15),
+              child: Container(
+                height: 50.0,
+                width: 220.0,
+                decoration: BoxDecoration(
+                  color: _recognitions!.isEmpty ? Colors.transparent : _recognitions![0] == 'Normal' ? Colors.green : Colors.red,
+                  // boxShadow:[ BoxShadow(
+                  //   color: Colors.blueGrey,
+                  // ),],
+                  // gradient: LinearGradient(colors: [Colors.lightBlueAccent,Colors.blue.withOpacity(0.9)]),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _recognitions!.isEmpty ? Colors.transparent : Colors.blueGrey,width: 0.2),
+                ),
+                child: Center(
                   child: Text(
-                    _recognitions.isEmpty ? 'Choose a file' : _recognitions[0]['label'],
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold
+                    _recognitions!.isEmpty ? '' : _recognitions![0]['label'],
+                    style: GoogleFonts.nunito(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                color: _recognitions.isEmpty ? Colors.blueGrey : _recognitions[0] == 'Normal' ? Colors.green : Colors.red,
+
               ),
-            )
+            ),
+
+            Spacer(),
+            Divider(color: Colors.blue,thickness: 15,),
+            Divider(color: Colors.lightBlue.shade300,thickness: 15,),
           ],
         ),
       ),

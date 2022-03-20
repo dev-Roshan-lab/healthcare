@@ -14,17 +14,17 @@ class CreateAccount extends StatefulWidget {
 class _CreateAccountState extends State<CreateAccount> {
   final _scaffoldkey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
-  String username1;
-  String username;
+  String? username1;
+  String? username;
   submit() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       preferences.setString('username', username.toString());
     });
     preferences.setString('username', username.toString());
-    username1 = preferences.get('username');
+    username1 = preferences.get('username') as String?;
 
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       Timer(Duration(seconds: 1), () {
@@ -75,7 +75,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       key: _formKey,
                       child: TextFormField(
                         validator: (val) {
-                          if (val.trim().length < 3 || val.isEmpty) {
+                          if (val!.trim().length < 3 || val.isEmpty) {
                             return "Username too short.";
                           } else if (val.trim().length > 20) {
                             return "Username too long";
@@ -90,7 +90,7 @@ class _CreateAccountState extends State<CreateAccount> {
                             preferences.setString('username', val.toString());
                           });
                           preferences.setString('username', val.toString());
-                          username1 = preferences.get('username');
+                          username1 = preferences.get('username') as String?;
                         },
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),

@@ -1,4 +1,3 @@
-// Start page, detects silently whether the user has signed in for not. If not, he's re-directed to the sign in page.
 import 'dart:async';
 import 'dart:io';
 
@@ -7,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:health/authentication/signredirect.dart';
+import 'package:health/src/pages/home_page.dart';
 import 'package:health/widgets/UserInfo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -23,9 +22,9 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   final LocalAuthentication _localAuthentication = LocalAuthentication();
   bool _hasFingerPrintSupport = false;
-  List<BiometricType> _availableBuimetricType = List<BiometricType>();
+  List<BiometricType> _availableBuimetricType = <BiometricType>[];
 
-  bool isAuth;
+  //bool isAuth;
 
   Future<void> _getBiometricsSupport() async {
     bool hasFingerPrintSupport = false;
@@ -38,11 +37,12 @@ class _StartScreenState extends State<StartScreen> {
     setState(() {
       _hasFingerPrintSupport = hasFingerPrintSupport;
     });
+    
   }
 
   Future<void> _getAvailableSupport() async {
     // 7. this method fetches all the available biometric supports of the device
-    List<BiometricType> availableBuimetricType = List<BiometricType>();
+    List<BiometricType> availableBuimetricType = <BiometricType>[];
     try {
       availableBuimetricType =
       await _localAuthentication.getAvailableBiometrics();
@@ -61,7 +61,7 @@ class _StartScreenState extends State<StartScreen> {
     bool authenticated = false;
     try {
       authenticated = await _localAuthentication.authenticateWithBiometrics(
-        localizedReason: "Authenticate for Testing", // message for dialog
+        localizedReason: "Verify to open the app", // message for dialog
         useErrorDialogs: true,// show error in dialog
         stickyAuth: true,// native process
       );
@@ -70,7 +70,7 @@ class _StartScreenState extends State<StartScreen> {
     }
     if (!mounted) return;
     if (authenticated) {
-      checkLogin();
+      callback();
     }
   }
 
@@ -79,7 +79,6 @@ class _StartScreenState extends State<StartScreen> {
     super.initState();
     startTimer();
     checkInternet();
-    _authenticateMe();
   }
 
   checkInternet() async {
@@ -96,10 +95,10 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   checkLogin() async {
-    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
+    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       handleSignIn(account);
       onError:
-      (err) {};
+          (err) {};
     });
     googleSignIn
         .signInSilently(suppressErrors: false) //signing in automatically
@@ -108,21 +107,25 @@ class _StartScreenState extends State<StartScreen> {
     }).catchError((err) {});
   }
 
-  handleSignIn(GoogleSignInAccount account) async {
+  handleSignIn(GoogleSignInAccount? account) async {
     if (account != null) {
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      preferences.setString('username', account.displayName);
-      preferences.setString('imgUrl', account.photoUrl);
+      preferences.setString('username', account.displayName!);
+      preferences.setString('imgurl', account.photoUrl!);
 
       setState(() {
-        UserInformation().username = preferences.get('username');
-        UserInformation().imgUrl = preferences.get('imgUrl');
-        isAuth = true;
+        UserInformation().username = preferences.get('username') as String?;
+        UserInformation().imgurl = preferences.get('imgurl') as String?;
+        //isAuth = true;
       });
+      print('img');
+      print(account.photoUrl);
     } else {
-      setState(() {
+      print('img');
+      print(account!.photoUrl);
+      /*setState(() {
         isAuth = false;
-      });
+      });*/
     }
   }
 
@@ -132,15 +135,16 @@ class _StartScreenState extends State<StartScreen> {
 
   callback() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return SignInPage();
+      return HomePage();
     }));
   }
 
   startTimer() async {
+    //print('current user ${googleSignIn.currentUser.photoUrl}');
     var duration = Duration(
         seconds:
-            1); // After 1 seconds, it is re-directed to the sign-in screen if the user is not authenticated, else it takes him into the app.
-    return Timer(duration, callback);
+        1); // After 1 seconds, it is re-directed to the sign-in screen if the user is not authenticated, else it takes him into the app.
+    return Timer(duration, _authenticateMe);
   }
 
   buildUnAuthScreen() {
@@ -151,9 +155,9 @@ class _StartScreenState extends State<StartScreen> {
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
                 colors: [
-              Theme.of(context).primaryColor.withOpacity(0.8),
-              Theme.of(context).accentColor,
-            ])),
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).accentColor,
+                ])),
         alignment: Alignment.center,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

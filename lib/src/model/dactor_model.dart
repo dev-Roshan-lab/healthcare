@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 class DoctorModel {
-    String name;
-    String type;
-    String description;
-    double rating;
-    double goodReviews;
-    double totalScore;
-    double satisfaction;
-    bool isfavourite;
-    String image;
-    String tags;
+    String? name;
+    String? type;
+    String? description;
+    double? rating;
+    double? goodReviews;
+    double? totalScore;
+    double? satisfaction;
+    bool? isfavourite;
+    String? image;
+    String? tags;
 
     DoctorModel({
         this.name,
@@ -26,16 +26,16 @@ class DoctorModel {
     });
 
     DoctorModel copyWith({
-        String name,
-        String type,
-        String description,
-        double rating,
-        double goodReviews,
-        double totalScore,
-        double satisfaction,
-        bool isfavourite,
-        String image,
-        String tags
+        String? name,
+        String? type,
+        String? description,
+        double? rating,
+        double? goodReviews,
+        double? totalScore,
+        double? satisfaction,
+        bool? isfavourite,
+        String? image,
+        String? tags
     }) => 
         DoctorModel(
             name: name ?? this.name,

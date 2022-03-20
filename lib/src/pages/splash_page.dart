@@ -5,7 +5,7 @@ import 'package:health/src/theme/light_color.dart';
 import 'package:health/src/theme/text_styles.dart';
 
 class SplashPage extends StatefulWidget {
-  SplashPage({Key key}) : super(key: key);
+  SplashPage({Key? key}) : super(key: key);
 
   @override
   _SplashPageState createState() => _SplashPageState();

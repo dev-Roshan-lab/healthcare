@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +20,7 @@ class CovidPage extends StatefulWidget {
 
 class _CovidPageState extends State<CovidPage> {
 
-  String name;
+  String? name;
   String condition = '';
   bool loading = false;
 
@@ -31,14 +32,14 @@ class _CovidPageState extends State<CovidPage> {
   }
 
   getFile() async {
-    FilePickerResult result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['wav'],
     );
     if (result != null) {
       PlatformFile file = result.files.first;
       firebase_storage.FirebaseStorage storage = firebase_storage.FirebaseStorage.instance;
-      File toUpload = File(file.path);
+      File toUpload = File(file.path!);
       try {
         final databaseReference = FirebaseDatabase.instance.reference();
         await firebase_storage.FirebaseStorage.instance.ref('drding-covid/$name').putFile(toUpload);
@@ -46,7 +47,7 @@ class _CovidPageState extends State<CovidPage> {
         await databaseReference.child('drding-covid/$name').update({
           'audio':url
         });
-        Response response = await get('https://covid-detections.herokuapp.com/predict/$name');
+        Response response = await get(Uri.parse('https://covid-detections.herokuapp.com/predict/$name'));
         print(response.body);
         setState(() {
           condition = response.body;
@@ -68,22 +69,24 @@ class _CovidPageState extends State<CovidPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            color: Theme.of(context).secondaryHeaderColor,
           ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+
         title: Text(
           "Covid-19 cough check",
           style: GoogleFonts.merriweather(
-            color: Colors.black,
+            color: Theme.of(context).secondaryHeaderColor,
           ),
         ),
       ),
@@ -107,7 +110,7 @@ class _CovidPageState extends State<CovidPage> {
                     color: Colors.black12,
                   ),
                 ],
-                color: Colors.white,
+                color: Theme.of(context).secondaryHeaderColor == Colors.black ? Colors.white : Theme.of(context).secondaryHeaderColor,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(25.0),
                   topLeft: Radius.circular(25.0),
@@ -136,7 +139,7 @@ class _CovidPageState extends State<CovidPage> {
                         child: Text(
                           'Upload audio',
                           style: GoogleFonts.nunito(
-                            fontSize: 15,
+                            color:Theme.of(context).primaryColor,fontSize: 15,
                           ),
                         ),
                       ),
@@ -151,7 +154,7 @@ class _CovidPageState extends State<CovidPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 10.0),
-                      child: Icon(FontAwesome.picture_o),
+                      child: Icon(FontAwesome.picture_o,color:Theme.of(context).primaryColor == Colors.white ? Colors.black:Theme.of(context).primaryColor ),
                     )
                   ],
                 ),
@@ -159,23 +162,31 @@ class _CovidPageState extends State<CovidPage> {
             ),
           ),
           SizedBox(height: 20,),
-          loading ? CircularProgressIndicator() : Padding(
-            padding: EdgeInsets.all(5),
-            child: Card(
-              elevation: 10,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
+          loading ? SpinKitRipple(color: Colors.lightBlueAccent,) :
+          Padding(
+            padding: const EdgeInsets.only(left:8.0,top:15,bottom:15),
+            child: condition != null ? Container(
+              height: 50.0,
+              width: 220.0,
+              decoration: BoxDecoration(
+                color: condition == 'negative' ? Colors.green : Colors.red,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: condition == '' ? Colors.transparent : Colors.blueGrey,width: 0.2),
+              ),
+              child: Center(
                 child: Text(
-                  condition == '' ? 'Choose a file' : condition,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
+                  condition.isEmpty ? '' : condition,
+                  style: GoogleFonts.nunito(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              color: condition == '' ? Colors.blueGrey : condition == 'negative' ? Colors.green : Colors.red,
-            ),
-          )
+            ) : Container(),
+          ),
+          Spacer(),
+          Divider(color: Colors.blue,thickness: 15,),
+          Divider(color: Colors.lightBlue.shade300,thickness: 15,),
         ],
       ),
     );

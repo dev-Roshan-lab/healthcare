@@ -18,48 +18,66 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  flutter_vector_icons: ^0.2.1
-  shimmer: ^1.1.2
-  animated_splash_screen:
-  google_fonts:
-  flutter_spinkit:
-  firebase_auth: ^0.18.1+2
-  fluttertoast:
-  firebase_core:
-  cloud_firestore:
-  firebase_storage:
-  firebase_auth_web: ^0.3.1+1
-  firebase_database:
-  google_sign_in: ^4.5.4
-  shared_preferences: ^0.5.12+4
-  pinput: ^0.2.6
-  animated_onboarding: ^0.0.2
-  international_phone_input: ^1.0.4
-  geolocator:
-  geocoding:
-  cached_network_image: ^2.0.0-rc
-  url_launcher: ^5.7.10
-  font_awesome_flutter:
-  image_picker: ^0.6.1+8
-  file_picker:
-  flutter_svg:
-  razorpay_flutter:
-  tflite: 1.0.5
+  flutter_vector_icons: ^1.0.0
+  shimmer: ^2.0.0
+  animated_splash_screen: ^1.2.0
+  google_fonts: ^2.3.1
+  flutter_spinkit: ^5.1.0
+  firebase_auth: ^3.3.11
+  fluttertoast: ^8.0.9
+  firebase_core: ^1.13.1
+  cloud_firestore: ^3.1.10
+  firebase_storage: ^10.2.9
+  firebase_auth_web: ^3.3.9
+  firebase_database: ^9.0.8
+  google_sign_in: ^5.2.4
+  shared_preferences: ^2.0.13
+  pinput: ^2.2.3
+  animated_onboarding_ns: ^0.0.2
+#  international_phone_input:
+#    git:
+#      url: git://github.com/niinyarko/flutter-international-phone-input
+#
+  geolocator: ^8.2.0
+  geocoding: ^2.0.4
+  cached_network_image: ^3.2.0
+  url_launcher: ^6.0.20
+  font_awesome_flutter: ^10.0.0
+  image_picker: ^0.8.4+11
+  file_picker: ^4.5.1
+  flutter_svg: ^1.0.3
+  razorpay_flutter: ^1.2.9
+  tflite: ^1.1.2
   flutter_datetime_picker:
-  local_auth:
-  maps_launcher:
-  flutter_local_notifications: ^1.4.4+2
-  ffi:
-  http:
+    git:
+      url: https://github.com/Realank/flutter_datetime_picker.git
+      ref: master
+  local_auth: ^1.1.11
+  maps_launcher: ^2.0.1
+  flutter_local_notifications: ^9.4.0
+  ffi: ^1.1.2
+  http: ^0.13.4
+  provider: ^6.0.2
+  flutter_launcher_icons: "^0.9.2"
+  agora_rtc_engine: ^5.0.1
+  permission_handler: ^9.2.0
+  flutter_tts: ^3.3.3
+  translator: ^0.1.7
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons:
+  cupertino_icons: ^1.0.4
+
+flutter_icons:
+    android: "launcher_icon"
+    ios: true
+    image_path: "assets/logo.png"
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +107,7 @@ flutter:
     - assets/doctor7.png
     - assets/doctor8.png
     - assets/doctor9.png
+    - assets/doctor10.png
     - assets/doctor3.png
     - assets/doctor4.png
     - assets/img/covid.svg
@@ -96,6 +115,7 @@ flutter:
     - assets/models/tb_model.tflite
     - assets/models/sc_labels.txt
     - assets/models/sc_model.tflite
+    - assets/logo.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

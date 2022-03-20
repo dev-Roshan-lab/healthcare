@@ -1,41 +1,49 @@
+
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:health/src/model/dactor_model.dart';
+import 'package:health/src/model/video_call.dart';
 import 'package:health/src/theme/extention.dart';
 import 'package:health/src/theme/light_color.dart';
 import 'package:health/src/theme/text_styles.dart';
 import 'package:health/src/theme/theme.dart';
 import 'package:health/src/widgets/rating_start.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:health/widgets/utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 
 class DetailPage extends StatefulWidget {
-  DetailPage({Key key, this.model}) : super(key: key);
-  final DoctorModel model;
+  DetailPage({Key? key, this.model}) : super(key: key);
+  final DoctorModel? model;
 
   @override
   _DetailPageState createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
+  final _channelController = TextEditingController();
+  bool _validateError = false;
+  ClientRole _role = ClientRole.Broadcaster;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  DoctorModel model;
-  String username = '';
-  String imgUrl = '';
+  DoctorModel? model;
+  String? username = '';
+  String? imgUrl = '';
   String msg = '';
   final authctrl = TextEditingController();
-  String times = '';
+  String? times = '';
   List appnts = [];
-  Razorpay _razorpay;
+  late Razorpay _razorpay;
   bool success = false;
-  DateTime date;
+  late DateTime date;
   List tags = [];
 
   @override
@@ -55,22 +63,23 @@ class _DetailPageState extends State<DetailPage> {
     username = preferences.getString('username');
     imgUrl = preferences.getString('imgUrl');
     times = preferences.getString('times');
-    if(times == null) {
+    if (times == null) {
       setState(() {
         times = '0';
       });
     }
     setState(() {
-      tags = model.tags.split("*");
+      tags = model!.tags!.split("*");
     });
   }
 
   getCloudData() async {
     appnts.clear();
-    CollectionReference _collectionRef = FirebaseFirestore.instance.collection(model.name);
+    CollectionReference _collectionRef =
+        FirebaseFirestore.instance.collection(model!.name!);
     QuerySnapshot querySnapshot = await _collectionRef.get();
-    final allData = querySnapshot.docs.map((e) => e.data()).toList();
-    for (int i = 0; i<allData.length; i++) {
+    List allData = querySnapshot.docs.map((e) => e.data()).toList();
+    for (int i = 0; i < allData.length; i++) {
       if (allData[i]["name"] == username) {
         appnts.add(allData[i]);
       }
@@ -82,9 +91,38 @@ class _DetailPageState extends State<DetailPage> {
   void dispose() {
     super.dispose();
     _razorpay.clear();
+    _channelController.dispose();
+
+  }
+  Future<void> onJoin(String id,BuildContext context) async {
+    // update input validation
+    print('cleic');
+    setState(() {
+      _channelController.text.isEmpty
+          ? _validateError = true
+          : _validateError = false;
+    });
+    if (id != null) {
+      await _handleCameraAndMic(Permission.camera);
+      await _handleCameraAndMic(Permission.microphone);
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoCall(
+            channelName: id,
+            role: ClientRole.Broadcaster,
+          ),
+        ),
+      );
+    }
   }
 
-  void openCheckout(int cost, String name) async {
+  Future<void> _handleCameraAndMic(Permission permission) async {
+    final status = await permission.request();
+    print(status);
+  }
+
+  void openCheckout(int cost, String? name) async {
     var options = {
       'key': 'rzp_test_421aJpA2JEmGGf',
       'amount': cost,
@@ -105,24 +143,30 @@ class _DetailPageState extends State<DetailPage> {
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     Fluttertoast.showToast(
-        msg: "SUCCESS: " + response.paymentId, toastLength: Toast.LENGTH_SHORT);
+        msg: "SUCCESS: " + response.paymentId!, toastLength: Toast.LENGTH_SHORT);
     setState(() {
       success = true;
     });
-    final ref = FirebaseFirestore.instance.collection(model.name).doc('$username-$times').set({
-      'cost':'500',
+    final ref = FirebaseFirestore.instance
+        .collection(model!.name!)
+        .doc('$username-$times')
+        .set({
+      'cost': '500',
       'doc_id': '$username-$times',
       'img': imgUrl,
-      'msg':msg,
-      'name':username,
-      'status':'waiting',
-      'time':date.toString()
+      'msg': msg,
+      'name': username,
+      'status': 'waiting',
+      'time': date.toString()
     }).then((value) async {
-      int t = num.parse(times);
+      int t = num.parse(times!) as int;
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      preferences.setString('times', (t+1).toString());
+      preferences.setString('times', (t + 1).toString());
       getCloudData();
-      Fluttertoast.showToast(msg: 'Successfully sent request', backgroundColor: Colors.green, textColor: Colors.green);
+      Fluttertoast.showToast(
+          msg: 'Successfully sent request',
+          backgroundColor: Colors.green,
+          textColor: Colors.green);
       setState(() {
         success = false;
       });
@@ -131,13 +175,14 @@ class _DetailPageState extends State<DetailPage> {
 
   void _handlePaymentError(PaymentFailureResponse response) {
     Fluttertoast.showToast(
-        msg: "ERROR: " + response.code.toString() + " - " + response.message,
+        msg: "ERROR: " + response.code.toString() + " - " + response.message!,
         toastLength: Toast.LENGTH_SHORT);
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
     Fluttertoast.showToast(
-        msg: "EXTERNAL_WALLET: " + response.walletName, toastLength: Toast.LENGTH_SHORT);
+        msg: "EXTERNAL_WALLET: " + response.walletName!,
+        toastLength: Toast.LENGTH_SHORT);
   }
 
   Widget _appbar() {
@@ -147,22 +192,87 @@ class _DetailPageState extends State<DetailPage> {
         BackButton(color: Theme.of(context).primaryColor),
         IconButton(
             icon: Icon(
-              model.isfavourite ? Icons.favorite : Icons.favorite_border,
-              color: model.isfavourite ? Colors.red : LightColor.grey,
+              model!.isfavourite! ? Icons.favorite : Icons.favorite_border,
+              color: model!.isfavourite! ? Colors.red : LightColor.grey,
             ),
             onPressed: () {
               setState(() {
-                model.isfavourite = !model.isfavourite;
+                model!.isfavourite = !model!.isfavourite!;
               });
             })
       ],
+    );
+  }
+  Widget _categoryCard(String title, String subtitle,
+      {Color? color, required Color lightColor, required Color textColor}) {
+    TextStyle titleStyle = TextStyles.title.bold.white;
+    //TextStyle subtitleStyle = TextStyles.body.bold.white;
+    if (AppTheme.fullWidth(context) < 392) {
+      titleStyle = TextStyles.body.bold.white;
+    }
+    return Container(
+      height: 280,
+      width: 150,
+      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 10),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            offset: Offset(4, 4),
+            blurRadius: 10,
+            color: lightColor.withOpacity(.8),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        child: Container(
+          child: Stack(
+            children: <Widget>[
+              Positioned(
+                top: -20,
+                left: -20,
+                child: CircleAvatar(
+                  backgroundColor: lightColor,
+                  radius: 60,
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Flexible(
+                    child: Text(title,
+                        style: GoogleFonts.nunito(
+                            fontSize: 15, fontWeight: FontWeight.bold, color: textColor))
+                        .hP8,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Flexible(
+                    child: Text(
+                      subtitle,
+                      style: GoogleFonts.nunito(
+                          fontSize: 15, color: textColor),
+                    ).hP8,
+                  ),
+                ],
+              ).p16
+            ],
+          ),
+        ),
+      ).ripple(() {}, borderRadius: BorderRadius.all(Radius.circular(20))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     TextStyle titleStyle = TextStyles.title.copyWith(fontSize: 25).bold;
+
+    TextStyle subtitleStyle = TextStyles.body.bold.white;
     if (AppTheme.fullWidth(context) < 393) {
+      subtitleStyle = TextStyles.bodySm.bold.white;
       titleStyle = TextStyles.title.copyWith(fontSize: 23).bold;
     }
     return Scaffold(
@@ -171,11 +281,14 @@ class _DetailPageState extends State<DetailPage> {
         bottom: false,
         child: Stack(
           children: <Widget>[
-            Image.asset(model.image),
+            Padding(
+              padding: const EdgeInsets.only(left: 35.0),
+              child: Image.asset(model!.image!),
+            ),
             DraggableScrollableSheet(
               maxChildSize: .8,
-              initialChildSize: .6,
-              minChildSize: .6,
+              initialChildSize: .70,
+              minChildSize: .65,
               builder: (context, scrollController) {
                 return Container(
                   height: AppTheme.fullHeight(context) * .6,
@@ -187,7 +300,7 @@ class _DetailPageState extends State<DetailPage> {
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30)),
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                   ),
                   child: SingleChildScrollView(
                     physics: BouncingScrollPhysics(),
@@ -199,22 +312,23 @@ class _DetailPageState extends State<DetailPage> {
                           contentPadding: EdgeInsets.all(0),
                           title: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              Text(model.name,
+                              Text(model!.name!,
                                   style: GoogleFonts.marmelad(
+                                      color: Theme.of(context).secondaryHeaderColor,
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold)),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Icon(Icons.check_circle,
-                                  size: 20,
-                                  color: Theme.of(context).primaryColor),
-                              Spacer(),
+                             IconButton(
+                               icon: Icon(Icons.rotate_right), // coffin ready panniko na vandhu coffin dance song podren
+                               // poda curd
+                               onPressed: () async => await getCloudData(),
+                               color: Colors.white,
+                             )
                             ],
                           ),
                           subtitle: Text(
-                            model.type,
+                            model!.type!,
                             style: TextStyles.bodySm.subTitleColor.bold,
                           ),
                         ),
@@ -226,7 +340,7 @@ class _DetailPageState extends State<DetailPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             RatingStar(
-                              rating: model.rating,
+                              rating: model!.rating,
                             )
                           ],
                         ),
@@ -236,12 +350,13 @@ class _DetailPageState extends State<DetailPage> {
                         ),
                         Text("About", style: titleStyle).vP16,
                         Text(
-                          model.description,
-                          style: TextStyle(
-                            color: Colors.black
-                          ),
+                          model!.description!,
+                          style: TextStyles.bodySm.subTitleColor,
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text("Clinical Focus", style: titleStyle).vP16,
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: SizedBox(
@@ -252,16 +367,28 @@ class _DetailPageState extends State<DetailPage> {
                               shrinkWrap: true,
                               itemCount: tags.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return Card(
-                                  color: Colors.blue,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Center(
-                                      child: Text(
-                                        tags[index],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white
+                                return Padding(
+                                  padding: const EdgeInsets.only(left:8.0,top:2,bottom:2),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                     color: Theme.of(context).primaryColor == Colors.white ? Colors.grey[100] : Colors.white12,
+                                      // boxShadow:[ BoxShadow(
+                                      //   color: Colors.blueGrey,
+                                      // ),],
+                                      // gradient: LinearGradient(colors: [Colors.lightBlueAccent,Colors.blue.withOpacity(0.9)]),
+                                      borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.blueGrey,width: 0.2),
+                                    ),
+
+
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left:10,right:10,top:8.0,bottom:8),
+                                      child: Center(
+                                        child: DottedText(
+                                          tags[index],
+                                          style: GoogleFonts.nunito(
+                                              fontWeight: FontWeight.w500,
+                                              color: Theme.of(context).secondaryHeaderColor),
                                         ),
                                       ),
                                     ),
@@ -271,12 +398,14 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                         TextField(
                           controller: authctrl,
                           decoration: InputDecoration(
                             suffixIcon: Transform.rotate(
-                              angle:3.92,
+                              angle: 3.92,
                               child: IconButton(
                                 icon: Icon(
                                   Icons.add_circle,
@@ -289,16 +418,16 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                             border: OutlineInputBorder(),
                             labelText: 'Enter your message',
-                            labelStyle: TextStyle(
-                                color: Colors.blueGrey
-                            ),
+                            labelStyle: TextStyle(color: Colors.blueGrey),
                             fillColor: Colors.blueGrey,
-                            focusedBorder:OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.black, width: 2.0),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                  color: Colors.black, width: 2.0),
                               borderRadius: BorderRadius.circular(25.0),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Colors.grey, width: 2.0),
+                              borderSide: const BorderSide(
+                                  color: Colors.grey, width: 2.0),
                               borderRadius: BorderRadius.circular(25.0),
                             ),
                           ),
@@ -319,65 +448,75 @@ class _DetailPageState extends State<DetailPage> {
                               children: <Widget>[
                                 FloatingActionButton(
                                   heroTag: "lol",
-                                  child: Icon(Icons.call),
+                                  child: Icon(Icons.call,color: Theme.of(context).secondaryHeaderColor,),
                                   onPressed: () async {
                                     const url = 'tel:9444160512';
                                     if (await canLaunch(url)) {
                                       launch(url);
                                     }
                                   },
-                                  backgroundColor: Colors.blueGrey,
-                                ),
-                                SizedBox(width: 10,),
-                                FloatingActionButton(
-                                  heroTag: "ogg",
-                                  child: Icon(Icons.message),
-                                  onPressed: () async {
-                                    print('lol');
-                                    const url = 'sms:+919444160512?body=Hello%20Doctor';
-                                    if (await canLaunch(url)) {
-                                      launch(url);
-                                    }
-                                  },
-                                  backgroundColor: Colors.blueGrey,
-                                  focusColor: Colors.blueGrey,
+                                  backgroundColor: Colors.lightBlue.withOpacity(0.7),
+                                  focusColor: Colors.blue,
                                 ),
                                 SizedBox(
                                   width: 10,
                                 ),
-                                FlatButton(
-                                  color: Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
+                                FloatingActionButton(
+                                  heroTag: "ogg",
+                                  child: Icon(Icons.message,color: Theme.of(context).secondaryHeaderColor,),
                                   onPressed: () async {
-                                    await DatePicker.showDateTimePicker(
-                                        context,
+                                    print('lol');
+                                    const url =
+                                        'sms:+919444160512?body=Hello%20Doctor';
+                                    if (await canLaunch(url)) {
+                                      launch(url);
+                                    }
+                                  },
+                                  backgroundColor: Colors.lightBlue.withOpacity(0.7),
+                                  focusColor: Colors.blue,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                GestureDetector(
+                                  onTap: () async {
+                                    await DatePicker.showDateTimePicker(context,
                                         showTitleActions: true,
                                         minTime: DateTime(2020, 5, 5, 20, 50),
-                                        maxTime: DateTime(2021, 10, 30, 05, 09),
+                                        maxTime: DateTime(2022, 10, 30, 05, 09),
                                         onConfirm: (time) async {
                                           print('confirm $time');
                                           setState(() {
                                             date = time;
                                           });
-                                          await scheduleAlarm(date, 'Medical checkup on ${date.toString()} with ${model.name}');
+                                          scheduleAlarm(date,
+                                              'Medical checkup on ${date.toString()} with ${model!.name}');
                                           //fixed opening of checkout even on clicking cancel
-                                          await openCheckout(5000, model.name);
+                                          openCheckout(5000, model!.name);
                                         });
                                     if (msg == '' || success == false) {
                                     } else {
                                       await getName();
                                     }
                                   },
-                                  child: Text(
-                                    "Make an appointment",
-                                    style: TextStyles.titleNormal.white,
-                                  ).p(10),
+                                  child: Container(
+                                    width: 220,
+                                    height: 45,
+                                    decoration:BoxDecoration(gradient: LinearGradient(colors: [Colors.lightBlueAccent,Colors.blue.withOpacity(0.8)]),borderRadius: BorderRadius.circular(10)),
+
+                                    child: Center(
+                                      child: Text(
+                                        "Make an appointment",
+                                        style: GoogleFonts.nunito(fontSize: 12,color: Colors.white),
+                                      ).p(10),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ).vP16,
                           ),
                         ),
+
                         Padding(
                           padding: EdgeInsets.all(2),
                           child: SizedBox(
@@ -387,57 +526,43 @@ class _DetailPageState extends State<DetailPage> {
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
                               itemBuilder: (context, int) {
-                                return Card(
-                                  shadowColor: Colors.tealAccent,
-                                  elevation: 10,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      children: [
-                                        Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundColor: appnts[int]["status"] == 'waiting' ? Colors.yellow : Colors.green,
+                                return  appnts[int]
+                                ["status"] ==
+                                    'waiting' ? _categoryCard(appnts[int]["status"].toString().toUpperCase(), appnts[int]["msg"],color: Colors.yellow, lightColor: Colors.yellowAccent, textColor: Colors.black) : _categoryCard(appnts[int]["status"].toString().toUpperCase(), appnts[int]["msg"],color: LightColor.green, lightColor: LightColor.lightGreen, textColor: Colors.green).ripple(() {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text(
+                                            'Accept appointment?',
+                                            style: GoogleFonts.merriweather(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          content: Text(
+                                            'Your appointment has been accepted by the doctor and you may join the video call now. Stay healthy!',
+                                            style: GoogleFonts.raleway(),
+                                          ),
+                                          actions: [
+                                            FlatButton(
+                                                child: Text('Join video call',style:GoogleFonts.nunito(color: Colors.green)),
+                                                onPressed: () async {
+                                                  Navigator.pop(context);
+                                                  onJoin('skr-sln-tmo',context);
+                                                }),
+                                            FlatButton(
+                                                child: Text('Close',style:GoogleFonts.nunito(color:Theme.of(context).secondaryHeaderColor)),
+                                                onPressed: () {
+
+                                                  Navigator.pop(context);
+                                                }
                                             ),
-                                            SizedBox(height: 5,),
-                                            Text(
-                                              'Status: \n${appnts[int]["status"]}',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            )
                                           ],
-                                        ),
-                                        SizedBox(width: 10,),
-                                        SingleChildScrollView(
-                                          scrollDirection: Axis.vertical,
-                                          child: SizedBox(
-                                            width: 50,
-                                            child: Text(
-                                              appnts[int]["msg"],
-                                              softWrap: true,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          '₹ ${appnts[int]["cost"]}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                );
+                                        );
+                                      });
+                                      // Navigator.pushNamed(context, '/BreakOutRoombu');
+
+                                    });
+
                               },
                             ),
                           ),
@@ -454,13 +579,14 @@ class _DetailPageState extends State<DetailPage> {
       ),
     );
   }
+
   void scheduleAlarm(
       DateTime scheduledNotificationDateTime, String alarmInfo) async {
     print('doing alaram-----------');
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'alarm_notif',
       'alarm_notif',
-      'Channel for Alarm notification',
+      channelDescription: 'Channel for Alarm notification',
       icon: 'ic_launcher',
       sound: RawResourceAndroidNotificationSound('a_long_cold_sting'),
       largeIcon: DrawableResourceAndroidBitmap('ic_launcher'),
@@ -473,11 +599,11 @@ class _DetailPageState extends State<DetailPage> {
         presentSound: true);
 
     var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        android: androidPlatformChannelSpecifics, iOS: iOSPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.schedule(0, 'Office', alarmInfo,
-        scheduledNotificationDateTime, platformChannelSpecifics).then((value) => print('----------------------value'));
+    await flutterLocalNotificationsPlugin
+        .schedule(0, 'Office', alarmInfo, scheduledNotificationDateTime,
+            platformChannelSpecifics)
+        .then((value) => print('----------------------value'));
   }
 }
-
-

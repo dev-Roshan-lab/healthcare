@@ -7,7 +7,7 @@ import 'package:health/src/theme/theme.dart';
 
 class ProgressWidget extends StatefulWidget {
   ProgressWidget(
-      {Key key,
+      {Key? key,
       this.value,
       this.totalValue = 100,
       this.activeColor,
@@ -17,11 +17,11 @@ class ProgressWidget extends StatefulWidget {
       this.rating})
       : super(key: key);
   final double totalValue;
-  final double rating;
-  final double value;
-  final Color activeColor;
-  final Color backgroundColor;
-  final String title;
+  final double? rating;
+  final double? value;
+  final Color? activeColor;
+  final Color? backgroundColor;
+  final String? title;
   final durationTime;
   @override
   _ProgressWidgetState createState() => _ProgressWidgetState();
@@ -29,12 +29,12 @@ class ProgressWidget extends StatefulWidget {
 
 class _ProgressWidgetState extends State<ProgressWidget>
     with TickerProviderStateMixin {
-  double progress;
-  Color activeColor;
-  Color backgroundColor;
+  late double progress;
+  Color? activeColor;
+  Color? backgroundColor;
   @override
   void initState() {
-    progress = (widget.value * 100) / widget.totalValue;
+    progress = (widget.value! * 100) / widget.totalValue;
     progress = (progress / 100) * 360;
     activeColor = widget.activeColor;
     backgroundColor = widget.backgroundColor;
@@ -54,14 +54,14 @@ class _ProgressWidgetState extends State<ProgressWidget>
     final inCurve = ElasticOutCurve(0.38);
     Widget _start(int index) {
       bool halfStar = false;
-      if ((widget.rating * 2) % 2 != 0) {
-        if (index < widget.rating && index == widget.rating - .5) {
+      if ((widget.rating! * 2) % 2 != 0) {
+        if (index < widget.rating! && index == widget.rating! - .5) {
           halfStar = true;
         }
       }
 
       return Icon(halfStar ? Icons.star_half : Icons.star,
-          color: index < widget.rating ? LightColor.orange : LightColor.grey);
+          color: index < widget.rating! ? LightColor.orange : LightColor.grey);
     }
 
     return Container(

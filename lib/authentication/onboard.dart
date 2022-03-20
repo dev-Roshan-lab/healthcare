@@ -1,4 +1,4 @@
-import 'package:animated_onboarding/animated_onboarding.dart';
+import 'package:animated_onboarding_ns/animated_onboarding_ns.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -93,7 +93,7 @@ class _onboardState extends State<onboard> {
         ),
         color: Colors.white),
     OnboardingPage(
-      color: Colors.green[500],
+      color: Colors.green[500]!,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Container(
@@ -146,7 +146,7 @@ class _onboardState extends State<onboard> {
       ),
     ),
     OnboardingPage(
-      color: Colors.green[400],
+      color: Colors.green[400]!,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Container(
@@ -403,7 +403,7 @@ class _onboardState extends State<onboard> {
       ),
     ),
     OnboardingPage(
-      color: Colors.red[300],
+      color: Colors.red[300]!,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[

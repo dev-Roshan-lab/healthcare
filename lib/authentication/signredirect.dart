@@ -7,12 +7,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:health/services/authservice.dart';
-import 'package:health/src/pages/home_page.dart';
 import 'package:health/startpage.dart';
 
 //Google authentication &
 //Mobile authentication
-String phisoCode;
+String? phisoCode;
 
 class SignInPage extends StatefulWidget {
   @override
@@ -34,12 +33,12 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   final formKey = new GlobalKey<FormState>();
-  String phoneNo, verificationId;
-  String smsCode;
+  String? phoneNo, verificationId;
+  String? smsCode;
   bool codeSent = false;
   bool isAuth = false;
   bool _visible = true;
-  String isoCCode;
+  String? isoCCode;
   bool isLoading = true;
 
   @override
@@ -50,10 +49,8 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   checkLogin() async {
-    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
+    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       handleSignIn(account);
-      onError:
-      (err) {};
     });
     googleSignIn
         .signInSilently(suppressErrors: false) //signing in automatically
@@ -67,10 +64,8 @@ class _SignInPageState extends State<SignInPage> {
           isAuth = true;
         });
       } else {
-        googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
+        googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
           handleSignIn(account);
-          onError:
-          (err) {};
         });
         googleSignIn
             .signInSilently(suppressErrors: false) //signing in automatically
@@ -81,7 +76,7 @@ class _SignInPageState extends State<SignInPage> {
     });
   }
 
-  handleSignIn(GoogleSignInAccount account) async {
+  handleSignIn(GoogleSignInAccount? account) async {
     if (account != null) {
       setState(() {
         isAuth = true;
@@ -104,12 +99,13 @@ class _SignInPageState extends State<SignInPage> {
   @override
   buildUnauthScreen() {
     return Scaffold(
-      appBar: _visible == false
+      backgroundColor: Theme.of(context).primaryColor,
+      /*appBar: _visible == false
           ? AppBar(
               elevation: 0,
-              backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).primaryColor,
               leading: IconButton(
-                  icon: Icon(Icons.arrow_back),
+                  icon: Icon(Icons.arrow_back,  color: Theme.of(context).secondaryHeaderColor,),
                   onPressed: () {
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) {
@@ -117,10 +113,10 @@ class _SignInPageState extends State<SignInPage> {
                     }));
                   }),
             )
-          : null,
+          : null,*/
       resizeToAvoidBottomInset: false,
       body: Container(
-        color: Colors.white,
+       color: Theme.of(context).primaryColor,
         alignment: Alignment.center,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -139,11 +135,11 @@ class _SignInPageState extends State<SignInPage> {
                       fontSize: 36),
                   children: <TextSpan>[
                     TextSpan(
-                        text: 'Health',
+                        text: 'Pocket',
                         style: GoogleFonts.satisfy(
-                            fontWeight: FontWeight.bold, color: Colors.black)),
+                            fontWeight: FontWeight.bold, color: Theme.of(context).secondaryHeaderColor)),
                     TextSpan(
-                        text: 'Care',
+                        text: 'Doc',
                         style: GoogleFonts.satisfy(
                             fontWeight: FontWeight.bold,
                             color: Colors.lightBlue.shade400)),
@@ -223,7 +219,7 @@ class _SignInPageState extends State<SignInPage> {
                                 padding:
                                     const EdgeInsets.only(top: 5.0, left: 25.0),
                                 child: Text(
-                                  "Sign in with Fingerprint",
+                                  "Verify fingerprint",
                                   style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold),
@@ -233,7 +229,10 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                         ),
                         onPressed: () {
-                          // TODO Fingerprint signin
+                          Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: (context) {
+                                return StartScreen();
+                              }));
                         },
                       ),
                     ),
@@ -255,6 +254,6 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isAuth ? HomePage() : buildUnauthScreen();
+    return isAuth ? StartScreen() : buildUnauthScreen();
   }
 }

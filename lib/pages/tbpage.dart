@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tflite/tflite.dart';
@@ -14,15 +15,15 @@ class TBPage extends StatefulWidget {
 
 class _TBPageState extends State<TBPage> {
 
-  File _image;
-  List _recognitions = [];
-  bool _busy;
+  late File _image;
+  List? _recognitions = [];
+  bool? _busy;
   bool loaded = false;
   final picker = ImagePicker();
 
   loadTfModel() async {
     Tflite.close();
-    String res = await Tflite.loadModel(
+    String? res = await Tflite.loadModel(
       model: "assets/models/tb_model.tflite",
       labels: "assets/models/tb_labels.txt",
       numThreads: 1
@@ -82,13 +83,14 @@ class _TBPageState extends State<TBPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            color: Theme.of(context).secondaryHeaderColor,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -97,7 +99,7 @@ class _TBPageState extends State<TBPage> {
         title: Text(
           "TB Prediction",
           style: GoogleFonts.merriweather(
-            color: Colors.black,
+            color: Theme.of(context).secondaryHeaderColor,
           ),
         ),
       ),
@@ -115,18 +117,19 @@ class _TBPageState extends State<TBPage> {
                 child: SizedBox(
                   height: 300,
                   width: 300,
-                  child: loaded ? Image.file(_image) : Card(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add, size: 30,),
-                        SizedBox(height: 20,),
-                        Text('Upload Image')
-                      ],
-                    ),
-                    elevation: 20,
-                  ),
+                  child: loaded ? Image.file(_image) : SvgPicture.asset('assets/img/TB.svg')
+                  // Card(
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.center,
+                  //     crossAxisAlignment: CrossAxisAlignment.center,
+                  //     children: [
+                  //       Icon(Icons.add, size: 30,),
+                  //       SizedBox(height: 20,),
+                  //       Text('Upload Image')
+                  //     ],
+                  //   ),
+                  //   elevation: 20,
+                  // ),
                 ),
               )
             ),
@@ -143,7 +146,7 @@ class _TBPageState extends State<TBPage> {
                       color: Colors.black12,
                     ),
                   ],
-                  color: Colors.white,
+                  color: Theme.of(context).secondaryHeaderColor == Colors.black ? Colors.white : Theme.of(context).secondaryHeaderColor,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(25.0),
                     topLeft: Radius.circular(25.0),
@@ -155,8 +158,7 @@ class _TBPageState extends State<TBPage> {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    print('lol');
-
+                    getImageFromGallery();
                   },
                   child: Row(
                     children: <Widget>[
@@ -168,8 +170,9 @@ class _TBPageState extends State<TBPage> {
                           padding:
                               EdgeInsets.symmetric(vertical: 15, horizontal: 10.0),
                           child: Text(
-                            'Predict',
+                            'Choose an image',
                             style: GoogleFonts.nunito(
+                              color:Theme.of(context).primaryColor,
                               fontSize: 15,
                             ),
                           ),
@@ -185,7 +188,7 @@ class _TBPageState extends State<TBPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),
-                        child: Icon(FontAwesome.picture_o),
+                        child: Icon(FontAwesome.picture_o,color:Theme.of(context).primaryColor == Colors.white ? Colors.black:Theme.of(context).primaryColor  ,),
                       )
                     ],
                   ),
@@ -193,22 +196,34 @@ class _TBPageState extends State<TBPage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(5),
-              child: Card(
-                elevation: 10,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(left:8.0,top:15,bottom:15),
+              child: Container(
+                height: 50.0,
+                width: 220.0,
+                decoration: BoxDecoration(
+                  color: _recognitions!.isEmpty ? Colors.transparent : _recognitions![0] == 'Normal' ? Colors.green : Colors.red,
+                  // boxShadow:[ BoxShadow(
+                  //   color: Colors.blueGrey,
+                  // ),],
+                  // gradient: LinearGradient(colors: [Colors.lightBlueAccent,Colors.blue.withOpacity(0.9)]),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _recognitions!.isEmpty ? Colors.transparent : Colors.blueGrey,width: 0.2),
+                ),
+                child: Center(
                   child: Text(
-                    _recognitions.isEmpty ? 'Choose a file' : _recognitions[0]['label'],
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
+                    _recognitions!.isEmpty ? '' : _recognitions![0]['label'],
+                    style: GoogleFonts.nunito(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                color: _recognitions.isEmpty ? Colors.blueGrey : _recognitions[0] == 'Normal' ? Colors.green : Colors.red,
+
               ),
-            )
+            ),
+            Spacer(),
+            Divider(color: Colors.blue,thickness: 15,),
+            Divider(color: Colors.lightBlue.shade300,thickness: 15,),
           ],
         ),
       ),

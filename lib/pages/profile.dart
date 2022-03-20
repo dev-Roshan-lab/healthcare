@@ -1,5 +1,11 @@
-import 'dart:io';
+/*
+'package:cached_network_image/src/cached_image_widget.dart': Failed assertion: line 231 pos 16: 'imageUrl != null': is not true.
+*/
 
+
+
+import 'dart:async';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
@@ -19,7 +25,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../startpage.dart';
 
 class EditProfile extends StatefulWidget {
-  final String currentUserId;
+  final String? currentUserId;
 
   const EditProfile({this.currentUserId});
   @override
@@ -27,10 +33,10 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  File imageFileAvatar;
-  String imgUrl;
-  String username;
-  String customBio;
+  File? imageFileAvatar;
+  String? imgUrl;
+  String? username;
+  String? customBio;
   TextEditingController displayNameController = TextEditingController();
   TextEditingController bioController = TextEditingController();
   bool isLoading = false;
@@ -49,16 +55,16 @@ class _EditProfileState extends State<EditProfile> {
     'Vit. C'
   ];
   List units = ['g', 'g', 'g', 'g', 'mg', 'mg', 'mg', 'mg', 'mug', 'mg'];
-  int protein = 0;
-  int calories = 0;
-  int fats = 0;
-  int carbs = 0;
-  int chol = 0;
-  int calcium = 0;
-  int sodium = 0;
-  int iron = 0;
-  int vita = 0;
-  int vitc = 0;
+  int? protein = 0;
+  int? calories = 0;
+  int? fats = 0;
+  int? carbs = 0;
+  int? chol = 0;
+  int? calcium = 0;
+  int? sodium = 0;
+  int? iron = 0;
+  int? vita = 0;
+  int? vitc = 0;
   bool display = false;
   List defaults = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -124,10 +130,10 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future getImage() async {
-    File newImgFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+    final XFile newImgFile = await (ImagePicker().pickImage(source: ImageSource.gallery) as FutureOr<XFile>);
     if (newImgFile != null) {
       setState(() {
-        this.imageFileAvatar = newImgFile;
+        this.imageFileAvatar = File(newImgFile.path);
         isLoading = true;
       });
     }
@@ -137,7 +143,7 @@ class _EditProfileState extends State<EditProfile> {
 
 // Step 4: Copy the file to a application document directory.
     final fileName = Path.basename(newImgFile.path);
-    final File localImage = await newImgFile.copy('$path/$fileName');
+    final File localImage = await File(newImgFile.path).copy('$path/$fileName');
     uploadToSharedPref(localImage.path);
   }
 
@@ -215,67 +221,17 @@ class _EditProfileState extends State<EditProfile> {
                         child: Center(
                           child: Stack(
                             children: <Widget>[
-                              (imageFileAvatar == null)
-                                  ? (imgUrl
-                                          .toString()
-                                          .contains('com.rachinc.respic'))
-                                      ? (imgUrl != "")
-                                          ? Material(
-                                              child: Image.file(
-                                                File(imgUrl),
-                                                width: 200.0,
-                                                filterQuality:
-                                                    FilterQuality.high,
-                                                height: 200.0,
-                                                fit: BoxFit.cover,
-                                              ),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(125.0)),
-                                              clipBehavior: Clip.hardEdge,
-                                              //Displaying new file/image.
-                                            )
+                              (googleSignIn.currentUser == null)
+                                  ? CircleAvatar(
+                                      backgroundColor: Colors.lightBlue.shade100,
+                                      radius: 25,
+                                      backgroundImage: NetworkImage(googleSignIn.currentUser!.photoUrl!),
+                                    )
                                           : Icon(
                                               Icons.account_circle,
                                               size: 90.0,
                                               color: Colors.grey,
-                                            )
-                                      : Material(
-                                          //Displaying existing file/image.
-                                          child: CachedNetworkImage(
-                                            placeholder: (context, url) =>
-                                                Container(
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2.0,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                            Color>(
-                                                        Colors.orangeAccent),
-                                              ),
-                                              width: 200.0,
-                                              height: 200.0,
-                                              padding: EdgeInsets.all(20.0),
                                             ),
-                                            imageUrl: imgUrl,
-                                            width: 200.0,
-                                            height: 200.0,
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(125.0)),
-                                          clipBehavior: Clip.hardEdge,
-                                        )
-                                  : Material(
-                                      child: Image.file(
-                                        imageFileAvatar,
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(125.0)),
-                                      clipBehavior: Clip.hardEdge,
-                                      //Displaying new file/image.
-                                    ),
                               IconButton(
                                 icon: Icon(
                                   FontAwesome.camera,
@@ -316,13 +272,13 @@ class _EditProfileState extends State<EditProfile> {
       isLoading = true;
     });
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    username = preferences.get('username');
-    imgUrl = preferences.get('imgUrl');
-    customBio = preferences.get('bio');
+    username = preferences.get('username') as String?;
+    imgUrl = preferences.get('imgurl') as String?;
+    customBio = preferences.get('bio') as String?;
     setState(() {
-      username = preferences.get('username');
-      imgUrl = preferences.get('imgUrl');
-      UserInformation().imgUrl = imgUrl;
+      username = preferences.get('username') as String?;
+      imgUrl = preferences.get('imgurl') as String?;
+      UserInformation().imgurl = imgUrl;
       UserInformation().username = username;
     });
     setState(() {
@@ -340,7 +296,7 @@ class _EditProfileState extends State<EditProfile> {
   getData() async {
     SharedPreferences nutrition = await SharedPreferences.getInstance();
     protein = nutrition.getInt('protein');
-    calories = nutrition.get('calories');
+    calories = nutrition.get('calories') as int?;
     fats = nutrition.getInt('fats');
     carbs = nutrition.getInt('carbs');
     chol = nutrition.getInt('chol');
@@ -369,7 +325,7 @@ class _EditProfileState extends State<EditProfile> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
     setState(() {
-      preferences.setString('imgUrl', path.toString());
+      preferences.setString('imgurl', path.toString());
     });
 
     setState(() {
@@ -480,7 +436,7 @@ class _EditProfileState extends State<EditProfile> {
                                           ? (imgUrl != "")
                                               ? Material(
                                                   child: Image.file(
-                                                    File(imgUrl),
+                                                    File(imgUrl!),
                                                     width: 200.0,
                                                     filterQuality:
                                                         FilterQuality.high,
@@ -517,7 +473,7 @@ class _EditProfileState extends State<EditProfile> {
                                                   height: 200.0,
                                                   padding: EdgeInsets.all(20.0),
                                                 ),
-                                                imageUrl: imgUrl,
+                                                imageUrl: imgUrl!,
                                                 filterQuality:
                                                     FilterQuality.high,
                                                 width: 200.0,
@@ -530,7 +486,7 @@ class _EditProfileState extends State<EditProfile> {
                                             )
                                       : Material(
                                           child: Image.file(
-                                            imageFileAvatar,
+                                            imageFileAvatar!,
                                             width: 200.0,
                                             height: 200.0,
                                             filterQuality: FilterQuality.high,

@@ -20,7 +20,7 @@ class _sign_inState extends State<sign_in> {
 
   checkLogin() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
+    googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       handleSignIn(account);
       onError:
       (err) {};
@@ -32,7 +32,7 @@ class _sign_inState extends State<sign_in> {
     }).catchError((err) {});
   }
 
-  handleSignIn(GoogleSignInAccount account) {
+  handleSignIn(GoogleSignInAccount? account) {
     if (account != null) {
       setState(() {
         isAuth = true;
@@ -45,7 +45,7 @@ class _sign_inState extends State<sign_in> {
   }
 
   buildUnauthScreen() {
-    return Scaffold(
+    return Scaffold(  backgroundColor: Theme.of(context).primaryColor,
       body: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -67,11 +67,11 @@ class _sign_inState extends State<sign_in> {
                   style: TextStyle(fontSize: 40),
                   children: <TextSpan>[
                     TextSpan(
-                        text: 'Health',
+                        text: 'Pocket',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, color: Colors.black)),
                     TextSpan(
-                        text: 'Care',
+                        text: 'Doc',
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.lightBlue.shade400)),
