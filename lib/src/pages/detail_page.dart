@@ -131,13 +131,15 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     Fluttertoast.showToast(
         msg: "SUCCESS: " + response.paymentId!, toastLength: Toast.LENGTH_SHORT);
     setState(() {
       success = true;
     });
-    final ref = FirebaseFirestore.instance
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? email = preferences.getString('email');
+    await FirebaseFirestore.instance
         .collection(model!.name!)
         .doc('$username-$times')
         .set({
@@ -147,7 +149,8 @@ class _DetailPageState extends State<DetailPage> {
       'msg': msg,
       'name': username,
       'status': 'waiting',
-      'time': date.toString()
+      'time': date.toString(),
+      'mail': email
     }).then((value) async {
       int t = num.parse(times!) as int;
       SharedPreferences preferences = await SharedPreferences.getInstance();

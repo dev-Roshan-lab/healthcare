@@ -16,7 +16,6 @@ import 'package:health/src/theme/light_color.dart';
 import 'package:health/src/theme/text_styles.dart';
 import 'package:health/src/theme/theme.dart';
 import 'package:health/startpage.dart';
-import 'package:health/widgets/LanguageChangeProvider.dart';
 import 'package:health/widgets/UserInfo.dart';
 import 'package:health/widgets/utils.dart';
 import 'package:http/http.dart';
@@ -24,6 +23,7 @@ import 'package:maps_launcher/maps_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:translator/translator.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 bool langChanged=false;
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -116,16 +116,53 @@ class _HomePageState extends State<HomePage> {
         ),
         IconButton(
             icon: Icon(Icons.language),
-            onPressed: () {
-              if (langChanged) {
-                setState(() {
-                  langChanged=false;
-                });
-              } else if(!langChanged) {
-                setState(() {
-                  langChanged=true;
-                });
-              }
+            onPressed: () async {
+              await showDialog(
+                  context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('Choose language'),
+                    actions: [
+                      TextButton(
+                        child: Text('English'),
+                        onPressed: () {
+                          setState(() {
+                            fromLanguageCode = toLanguage;
+                            toLanguage = 'en';
+                            langChanged = true;
+                          });
+                          setState(() {});
+                          Navigator.pop(context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Hindi'),
+                        onPressed: () {
+                          setState(() {
+                            fromLanguageCode = toLanguage;
+                            toLanguage = 'hi';
+                            langChanged = true;
+                          });
+                          setState(() {});
+                          Navigator.pop(context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Tamil'),
+                        onPressed: () {
+                          setState(() {
+                            fromLanguageCode = toLanguage;
+                            toLanguage = 'ta';
+                            langChanged = true;
+                          });
+                          setState(() {});
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
 
               // Navigator.pushNamed(
               //   context,
@@ -140,9 +177,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _header() {
     langChanged ? translator.translate(title, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        title = value.text;
-      });
+      title = value.text;
+      //setState(() {});
     }) : null;
     /*setState(() {
       title= langChanged ? GoogleTranslator().translate(title,from: fromLanguageCode,to: toLanguage) : title;
@@ -159,9 +195,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _searchField() {
     langChanged ? translator.translate("Search", from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        search = value.text;
-      });
+      search = value.text;
+      //setState(() {});
     }) : null;
     /*setState(() {
       search = langChanged ? GoogleTranslator().translate("Search", from: fromLanguageCode, to: toLanguage) : "Search";
@@ -215,35 +250,25 @@ class _HomePageState extends State<HomePage> {
 
   Widget _category() {
     langChanged ? translator.translate(title1, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        title1 = value.text;
-      });
+      title1 = value.text;
     }):null;
     langChanged ? translator.translate(tb, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        tb = value.text;
-      });
+      tb = value.text;
     }):null;
     langChanged ? translator.translate(skincancer, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        skincancer = value.text;
-      });
+      skincancer = value.text;
     }):null;
     langChanged ? translator.translate(covid, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        covid = value.text;
-      });
+      covid = value.text;
     }):null;
     langChanged ? translator.translate(symp, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        symp = value.text;
-      });
+      symp = value.text;
     }):null;
     langChanged ? translator.translate(nearby, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        nearby = value.text;
-      });
+      nearby = value.text;
     }):null;
+
+    setState(() {});
     return Column(
       children: <Widget>[
         Padding(
@@ -424,9 +449,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _doctorsList() {
     langChanged ? translator.translate(title2, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        title2 = value.text;
-      });
+      title2 = value.text;
+      //setState(() {});
     }):null;
     return SliverList(
       delegate: SliverChildListDelegate(
@@ -463,15 +487,12 @@ class _HomePageState extends State<HomePage> {
 
   Widget _doctorTile(DoctorModel model) {
     langChanged ? translator.translate(model.name!, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        model.name = value.text;
-      });
+      model.name = value.text;
     }):null;
     langChanged ? translator.translate(model.type!, from: fromLanguageCode, to: toLanguage).then((value) {
-      setState(() {
-        model.type = value.text;
-      });
+      model.type = value.text;
     }):null;
+    //setState(() {});
     return GestureDetector(
 
       onTapCancel:() async {
@@ -783,9 +804,6 @@ class _HomePageState extends State<HomePage> {
                         GestureDetector(
                           onTap: () {
                             print('lauch link');
-                            Utils.openLink(
-                                url:
-                                    'https://play.google.com/store/apps/details?id=com.rachinc.respic');
                           },
                           child: Row(
                             children: [

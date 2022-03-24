@@ -22,13 +22,12 @@ class _sign_inState extends State<sign_in> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       handleSignIn(account);
-      onError:
-      (err) {};
     });
     googleSignIn
         .signInSilently(suppressErrors: false) //signing in automatically
-        .then((account) {
+        .then((account) async {
       handleSignIn(account);
+      await preferences.setString('email', account!.email.toString());
     }).catchError((err) {});
   }
 
@@ -53,7 +52,7 @@ class _sign_inState extends State<sign_in> {
                 end: Alignment.bottomLeft,
                 colors: [
               Theme.of(context).primaryColor.withOpacity(0.8),
-              Theme.of(context).accentColor,
+              Theme.of(context).colorScheme.secondary,
             ])),
         alignment: Alignment.center,
         child: Column(

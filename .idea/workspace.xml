@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_LOG_LEVEL" value="error" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
@@ -23,11 +27,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c5b09a41-e51f-471f-9dac-61cffa094394" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/health.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/health.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/health_android.iml" beforeDir="false" afterPath="$PROJECT_DIR$/android/health_android.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/authentication/signin.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/authentication/signin.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/src/pages/detail_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/pages/detail_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/src/pages/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/pages/home_page.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,12 +204,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="Dart">
           <url>file://$PROJECT_DIR$/lib/src/pages/home_page.dart</url>
-          <line>537</line>
+          <line>558</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="Dart">
           <url>file://$PROJECT_DIR$/lib/src/pages/home_page.dart</url>
-          <line>455</line>
+          <line>479</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="Dart">
