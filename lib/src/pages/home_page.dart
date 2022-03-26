@@ -62,6 +62,38 @@ class _HomePageState extends State<HomePage> {
     sendRequest();
   }
 
+  translateText() async {
+    langChanged ? await translator.translate(title, from: fromLanguageCode, to: toLanguage).then((value) {
+      title = value.text;
+      //setState(() {});
+    }) : null;
+    langChanged ? await translator.translate("Search", from: fromLanguageCode, to: toLanguage).then((value) {
+      search = value.text;
+      //setState(() {});
+    }) : null;
+    langChanged ? await translator.translate(title1, from: fromLanguageCode, to: toLanguage).then((value) {
+      title1 = value.text;
+    }):null;
+    langChanged ? await translator.translate(tb, from: fromLanguageCode, to: toLanguage).then((value) {
+      tb = value.text;
+    }):null;
+    langChanged ? await translator.translate(skincancer, from: fromLanguageCode, to: toLanguage).then((value) {
+      skincancer = value.text;
+    }):null;
+    langChanged ? await translator.translate(covid, from: fromLanguageCode, to: toLanguage).then((value) {
+      covid = value.text;
+    }):null;
+    langChanged ? await translator.translate(symp, from: fromLanguageCode, to: toLanguage).then((value) {
+      symp = value.text;
+    }):null;
+    langChanged ? await translator.translate(nearby, from: fromLanguageCode, to: toLanguage).then((value) {
+      nearby = value.text;
+    }):null;
+    langChanged ? await translator.translate(title2, from: fromLanguageCode, to: toLanguage).then((value) {
+      title2 = value.text;
+    }):null;
+  }
+
   sendRequest() async {
     Response response = await get(Uri.parse('https://csv2api.herokuapp.com/api/v1?url=https://raw.githubusercontent.com/dev-Roshan-lab/healthcare/main/data.csv'));
     Map fetchedData = jsonDecode(response.body);
@@ -116,8 +148,8 @@ class _HomePageState extends State<HomePage> {
         ),
         IconButton(
             icon: Icon(Icons.language),
-            onPressed: () async {
-              await showDialog(
+            onPressed: () {
+              showDialog(
                   context: context,
                 builder: (context) {
                   return AlertDialog(
@@ -125,50 +157,47 @@ class _HomePageState extends State<HomePage> {
                     actions: [
                       TextButton(
                         child: Text('English'),
-                        onPressed: () {
+                        onPressed: () async {
                           setState(() {
                             fromLanguageCode = toLanguage;
                             toLanguage = 'en';
                             langChanged = true;
                           });
-                          setState(() {});
+                          await translateText();
                           Navigator.pop(context);
+                          setState(() {});
                         },
                       ),
                       TextButton(
                         child: Text('Hindi'),
-                        onPressed: () {
+                        onPressed: () async {
                           setState(() {
                             fromLanguageCode = toLanguage;
                             toLanguage = 'hi';
                             langChanged = true;
                           });
-                          setState(() {});
+                          await translateText();
                           Navigator.pop(context);
+                          setState(() {});
                         },
                       ),
                       TextButton(
                         child: Text('Tamil'),
-                        onPressed: () {
+                        onPressed: () async {
                           setState(() {
                             fromLanguageCode = toLanguage;
                             toLanguage = 'ta';
                             langChanged = true;
                           });
-                          setState(() {});
+                          await translateText();
                           Navigator.pop(context);
+                          setState(() {});
                         },
                       ),
                     ],
                   );
                 },
               );
-
-              // Navigator.pushNamed(
-              //   context,
-              //   "/chatScreen",
-              //     arguments: doctorDataList
-              // );
             }
         )
       ],
@@ -176,13 +205,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _header() {
-    langChanged ? translator.translate(title, from: fromLanguageCode, to: toLanguage).then((value) {
-      title = value.text;
-      //setState(() {});
-    }) : null;
-    /*setState(() {
-      title= langChanged ? GoogleTranslator().translate(title,from: fromLanguageCode,to: toLanguage) : title;
-    });*/
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -194,13 +216,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _searchField() {
-    langChanged ? translator.translate("Search", from: fromLanguageCode, to: toLanguage).then((value) {
-      search = value.text;
-      //setState(() {});
-    }) : null;
-    /*setState(() {
-      search = langChanged ? GoogleTranslator().translate("Search", from: fromLanguageCode, to: toLanguage) : "Search";
-    });*/
+
     return Container(
       height: 55,
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -249,26 +265,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _category() {
-    langChanged ? translator.translate(title1, from: fromLanguageCode, to: toLanguage).then((value) {
-      title1 = value.text;
-    }):null;
-    langChanged ? translator.translate(tb, from: fromLanguageCode, to: toLanguage).then((value) {
-      tb = value.text;
-    }):null;
-    langChanged ? translator.translate(skincancer, from: fromLanguageCode, to: toLanguage).then((value) {
-      skincancer = value.text;
-    }):null;
-    langChanged ? translator.translate(covid, from: fromLanguageCode, to: toLanguage).then((value) {
-      covid = value.text;
-    }):null;
-    langChanged ? translator.translate(symp, from: fromLanguageCode, to: toLanguage).then((value) {
-      symp = value.text;
-    }):null;
-    langChanged ? translator.translate(nearby, from: fromLanguageCode, to: toLanguage).then((value) {
-      nearby = value.text;
-    }):null;
-
-    setState(() {});
     return Column(
       children: <Widget>[
         Padding(
@@ -448,10 +444,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _doctorsList() {
-    langChanged ? translator.translate(title2, from: fromLanguageCode, to: toLanguage).then((value) {
-      title2 = value.text;
-      //setState(() {});
-    }):null;
+
     return SliverList(
       delegate: SliverChildListDelegate(
         [
@@ -492,7 +485,7 @@ class _HomePageState extends State<HomePage> {
     langChanged ? translator.translate(model.type!, from: fromLanguageCode, to: toLanguage).then((value) {
       model.type = value.text;
     }):null;
-    //setState(() {});
+    setState(() {});
     return GestureDetector(
 
       onTapCancel:() async {

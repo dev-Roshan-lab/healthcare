@@ -28,10 +28,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c5b09a41-e51f-471f-9dac-61cffa094394" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android.zip" beforeDir="false" afterPath="$PROJECT_DIR$/android.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/authentication/signin.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/authentication/signin.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/src/model/settings.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/model/settings.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/src/pages/detail_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/pages/detail_page.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
