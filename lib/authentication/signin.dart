@@ -19,7 +19,6 @@ class _sign_inState extends State<sign_in> {
   }
 
   checkLogin() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
     googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       handleSignIn(account);
     });
@@ -27,7 +26,6 @@ class _sign_inState extends State<sign_in> {
         .signInSilently(suppressErrors: false) //signing in automatically
         .then((account) async {
       handleSignIn(account);
-      await preferences.setString('email', account!.email.toString());
     }).catchError((err) {});
   }
 

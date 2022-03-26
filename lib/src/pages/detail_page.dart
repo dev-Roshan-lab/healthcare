@@ -1,4 +1,3 @@
-
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import '../../api/googleAuth.dart';
 import '../../main.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -74,15 +73,11 @@ class _DetailPageState extends State<DetailPage> {
 
   getCloudData() async {
     appnts.clear();
-    CollectionReference _collectionRef =
-        FirebaseFirestore.instance.collection(model!.name!);
-    QuerySnapshot querySnapshot = await _collectionRef.get();
-    List allData = querySnapshot.docs.map((e) => e.data()).toList();
-    for (int i = 0; i < allData.length; i++) {
-      if (allData[i]["name"] == username) {
-        appnts.add(allData[i]);
-      }
-    }
+    await FirebaseFirestore.instance.collection(model!.name!).get().then((value) {
+      setState(() {
+        appnts.addAll(value.docs);
+      });
+    });
     print(appnts);
   }
 
@@ -137,8 +132,8 @@ class _DetailPageState extends State<DetailPage> {
     setState(() {
       success = true;
     });
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? email = preferences.getString('email');
+    final user=await GoogleAuthApi.signIn();
+    if(user==null) return;
     await FirebaseFirestore.instance
         .collection(model!.name!)
         .doc('$username-$times')
@@ -150,7 +145,7 @@ class _DetailPageState extends State<DetailPage> {
       'name': username,
       'status': 'waiting',
       'time': date.toString(),
-      'mail': email
+      'mail': user.email
     }).then((value) async {
       int t = num.parse(times!) as int;
       SharedPreferences preferences = await SharedPreferences.getInstance();
